@@ -5,6 +5,7 @@ enum ActiveStatus {
 }
 
 enum Role {
-    USER
-    AUTHOR
+    TENANT
+    LANDLORD
+    ADMIN
 }

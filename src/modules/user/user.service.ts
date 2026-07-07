@@ -3,10 +3,9 @@ import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { RegisterUserPayload } from "./user.interface";
 
-
 const registerUserIntoBD = async (payload : RegisterUserPayload) =>{
-    const {name , email, password, profilePhoto} = payload;
- const isUserExist = await prisma.user.findUnique({
+    const {name , email, password, profilePhoto, role} = payload;
+    const isUserExist = await prisma.user.findUnique({
         where :{
             email
         }
@@ -17,12 +16,12 @@ const registerUserIntoBD = async (payload : RegisterUserPayload) =>{
 
     const hashedPassword = await bcrypt.hash(password , Number(config.bcrypt_salt_rounds));
     
-const createdUser = await prisma.user.create({
+    const createdUser = await prisma.user.create({
         data: {
             name,
             email,
             password : hashedPassword,
-            
+            role
         }
     })
 
@@ -38,7 +37,7 @@ const createdUser = await prisma.user.create({
             email : createdUser.email || email
         },
         omit : {
-            password
+            password: true
         },
         include : {
             profile : true
@@ -48,6 +47,52 @@ const createdUser = await prisma.user.create({
    return user
 }
 
+const getMyProfileFromDB = async (userId : string) => {
+    const user = await prisma.user.findUnique({
+        where : {
+            id : userId
+        },
+        omit : {
+            password : true
+        },
+        include : {
+            profile : true
+        }
+    })
+    return user
+} 
+
+const updateMyProfileFromDB = async (userId : string, payload : any) => {
+    const {name, email, profilePhoto, bio} = payload;
+
+    const updatedUser = await prisma.user.update({
+        where : { id : userId},
+
+        data : {
+            name,
+            email,
+            profile : {
+                update : {
+                    profilePhoto,
+                    bio
+                }
+            }
+        },
+
+        omit : {
+            password : true
+        },
+
+        include : {
+            profile : true
+        }
+    })
+
+    return updatedUser;
+}
+
 export const userService = {
-    registerUserIntoBD
+    registerUserIntoBD,
+    getMyProfileFromDB,
+    updateMyProfileFromDB
 }
