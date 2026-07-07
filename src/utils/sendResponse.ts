@@ -1,0 +1,28 @@
+import { Response } from "express";
+import httpStatus from "http-status";
+
+
+type TMeta = {
+    page : number,
+    limit : number,
+    total : number
+}
+
+type TRresponseData<T> = {
+    success : boolean;
+    statusCode : number;
+    message : string;
+    data : T;
+    meta ?: TMeta
+}
+
+export const sendResponse = <T>(res:Response , data : TRresponseData<T>) => {
+    res.status(httpStatus.CREATED).json({
+        success : data.success,
+        statusCode : data.statusCode,
+        message : data.message,
+        data : data.data,
+        meta : data.meta
+    })
+}
+
