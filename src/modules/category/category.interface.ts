@@ -1,6 +1,4 @@
-// ========================
-// Category Interfaces
-// ========================
+
 
 export interface ICreateCategoryPayload {
   name: string;

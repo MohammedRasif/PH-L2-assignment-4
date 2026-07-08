@@ -5,15 +5,11 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
-// ========================
-// Public Routes
-// ========================
+
 router.get("/", propertyController.getAllProperties);
 router.get("/:id", propertyController.getPropertyById);
 
-// ========================
-// Landlord Protected Routes
-// ========================
+
 router.post(
   "/",
   auth(Role.LANDLORD),

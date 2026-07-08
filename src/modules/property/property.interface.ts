@@ -1,8 +1,5 @@
-import { ActiveStatus } from "../../../generated/prisma/enums";
 
-// ========================
-// Property Interfaces
-// ========================
+
 
 export interface ICreatePropertyPayload {
   title: string;
@@ -13,7 +10,6 @@ export interface ICreatePropertyPayload {
   bathrooms: number;
   categoryId: string;
   amenities?: string[];
-  images?: string[];
   isAvailable?: boolean;
 }
 
@@ -26,7 +22,6 @@ export interface IUpdatePropertyPayload {
   bathrooms?: number;
   categoryId?: string;
   amenities?: string[];
-  images?: string[];
   isAvailable?: boolean;
 }
 
@@ -37,6 +32,7 @@ export interface IPropertyFilterQuery {
   categoryId?: string;
   bedrooms?: number;
   bathrooms?: number;
+  amenities?: string[];  
   isAvailable?: boolean;
   page?: number;
   limit?: number;

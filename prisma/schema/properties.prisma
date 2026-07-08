@@ -7,6 +7,8 @@ model Property {
   bedrooms    Int
   bathrooms   Int
   categoryId  String
+  amenities   String[]
+  isAvailable Boolean  @default(true)
   category    Category @relation(fields: [categoryId], references: [id])
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id])
