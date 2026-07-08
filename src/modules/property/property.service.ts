@@ -27,7 +27,6 @@ const getAllProperties = async (filters: IPropertyFilterQuery) => {
     if (bedrooms) {
         where.bedrooms = bedrooms;
     }
-    // filter by amenities — hasEvery checks if all requested amenities exist in the array
     if (amenities && amenities.length > 0) {
         where.amenities = { hasEvery: amenities };
     }
@@ -91,6 +90,18 @@ const getPropertyById = async (id: string) => {
 };
 
 const createProperty = async (ownerId: string, payload: ICreatePropertyPayload) => {
+    console.log("Owner ID:", ownerId);
+    console.log("Payload:", payload);
+    console.log("Category ID:", payload.categoryId);
+
+    const category = await prisma.category.findUnique({
+        where: {
+            id: payload.categoryId,
+        },
+    });
+
+    console.log("Category Found:", category);
+
     const result = await prisma.property.create({
         data: {
             ...payload,
@@ -99,7 +110,9 @@ const createProperty = async (ownerId: string, payload: ICreatePropertyPayload) 
         include: {
             category: true,
             owner: {
-                omit: { password: true },
+                omit: {
+                    password: true,
+                },
             },
         },
     });

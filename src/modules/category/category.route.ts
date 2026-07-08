@@ -5,15 +5,10 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
-// ========================
-// Public Routes
-// ========================
 router.get("/", categoryController.getAllCategories);
 router.get("/:id", categoryController.getCategoryById);
 
-// ========================
-// Admin Protected Routes
-// ========================
+
 router.post(
   "/",
   auth(Role.ADMIN),

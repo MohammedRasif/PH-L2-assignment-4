@@ -58,6 +58,7 @@ const getPropertyById = catchAsync(async (req: Request, res: Response, next: Nex
 const createProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const ownerId = req.user?.id;
     const payload = req.body;
+    console.log(payload)
 
     const result = await propertyService.createProperty(ownerId as string, payload);
 
