@@ -72,15 +72,20 @@ To test the entire flow of the application properly, follow these steps in order
 - **Body:** 
   ```json
   {
-    "title": "Beautiful Apartment",
-    "description": "A spacious 3 bedroom apartment.",
-    "price": 1500,
-    "location": "New York, NY",
-    "bedrooms": 3,
-    "bathrooms": 2,
-    "categoryId": "uuid",
-    "amenities": ["WiFi", "Pool"]
-  }
+  "title": "Modern Family Apartment",
+  "description": "A beautiful and spacious 3-bedroom apartment located in the heart of the city.",
+  "price": 25000,
+  "location": "Dhaka",
+  "bedrooms": 3,
+  "bathrooms": 2,
+  "categoryId": "3883f2f1-2782-4d8b-a7ba-22a73a428b60",
+  "amenities": [
+    "WiFi",
+    "Parking",
+    "Gym"
+  ],
+  "isAvailable": true
+}
   ```
 
 ### Get All Properties

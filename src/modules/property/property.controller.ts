@@ -71,11 +71,13 @@ const createProperty = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 const updateProperty = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    console.log("hit update property")
     const ownerId = req.user?.id;
     const { id } = req.params;
     const payload = req.body;
+    console.log(req.user?.role)
 
-    const result = await propertyService.updateProperty(id, ownerId as string, payload);
+    const result = await propertyService.updateProperty(id as string, ownerId as string, payload);
 
     sendResponse(res, {
         success: true,
