@@ -20,8 +20,8 @@ const app: Application = express();
 
 
 app.use(cors({
-    origin: config.app_url,
-    credentials:true,
+  origin: config.app_url,
+  credentials: true,
 
 }))
 
@@ -30,11 +30,11 @@ app.use(express.json({
     (req as any).rawBody = buf;
   }
 }))
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-app.get("/", (req:Request, res : Response) =>{
-    res.send("hello,world")
+app.get("/", (req: Request, res: Response) => {
+  res.send("hello,world")
 })
 
 

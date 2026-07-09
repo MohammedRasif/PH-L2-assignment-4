@@ -102,17 +102,19 @@ const confirmPayment = async (payload: IConfirmPaymentPayload) => {
   const session = await stripe.checkout.sessions.retrieve(payload.transactionId);
 
   if (session.payment_status === "paid") {
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: "COMPLETED",
-        paidAt: new Date()
-      }
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: "COMPLETED",
+          paidAt: new Date()
+        }
+      });
 
-    await prisma.rentalRequest.update({
-      where: { id: payment.rentalRequestId },
-      data: { status: "COMPLETED" }
+      await tx.rentalRequest.update({
+        where: { id: payment.rentalRequestId },
+        data: { status: "COMPLETED" }
+      });
     });
 
     return { message: "Payment confirmed successfully" };
@@ -171,26 +173,36 @@ const stripeWebhook = async (rawBody: Buffer, signature: string) => {
     throw new Error(`Webhook Error: ${err.message}`);
   }
 
+  console.log(`[Stripe Webhook] Received event type: ${event.type}`);
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const transactionId = session.id;
 
+    console.log(`[Stripe Webhook] Session completed for ID: ${transactionId}`);
+    console.log(`[Stripe Webhook] Payment Status: ${session.payment_status}`);
+    console.log(`[Stripe Webhook] Full Session Payload:`, JSON.stringify(session, null, 2));
+
     if (session.payment_status === "paid") {
       const payment = await prisma.payment.findUnique({ where: { transactionId } });
+      console.log(`[Stripe Webhook] Found Payment in DB:`, payment ? "YES" : "NO (transactionId might be mismatched)");
       
       if (payment) {
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: "COMPLETED",
-            paidAt: new Date()
-          }
-        });
+        await prisma.$transaction(async (tx) => {
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: {
+              status: "COMPLETED",
+              paidAt: new Date()
+            }
+          });
 
-        await prisma.rentalRequest.update({
-          where: { id: payment.rentalRequestId },
-          data: { status: "COMPLETED" }
+          await tx.rentalRequest.update({
+            where: { id: payment.rentalRequestId },
+            data: { status: "COMPLETED" }
+          });
         });
+        console.log(`[Stripe Webhook] Successfully updated Payment and RentalRequest to COMPLETED`);
       }
     }
   } else if (event.type === 'checkout.session.expired') {

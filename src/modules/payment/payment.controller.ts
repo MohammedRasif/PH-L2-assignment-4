@@ -75,9 +75,18 @@ const getPaymentById = async (req: Request, res: Response, next: NextFunction) =
 
 
 const stripeWebhook = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  console.log("=========================================");
+  console.log("[Stripe Webhook API] Endpoint HIT!");
+  
   const signature = req.headers['stripe-signature'] as string;
-  const rawBody = (req as any).rawBody; 
+  const rawBody = (req as any).rawBody; // The raw buffer attached by express.json
+
+  console.log(`[Stripe Webhook API] Signature present: ${!!signature}`);
+  console.log(`[Stripe Webhook API] Raw body present: ${!!rawBody}`);
+  console.log("=========================================");
+
   if (!rawBody || !signature) {
+    console.error("[Stripe Webhook API] Error: Missing body or signature");
     res.status(400).send("Webhook Error: Missing body or signature");
     return;
   }
