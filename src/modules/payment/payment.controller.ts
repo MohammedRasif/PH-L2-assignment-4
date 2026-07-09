@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { paymentService } from "./payment.service";
+import { catchAsync } from "../../utils/catchAsync";
 
 // ========================
 // Payment Controller
@@ -72,17 +73,23 @@ const getPaymentById = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-// POST /api/payments/ssl/success  (SSLCommerz success callback)
 const sslCommerzSuccess = async (req: Request, res: Response, next: NextFunction) => {};
 
-// POST /api/payments/ssl/fail  (SSLCommerz fail callback)
 const sslCommerzFail = async (req: Request, res: Response, next: NextFunction) => {};
 
-// POST /api/payments/ssl/cancel  (SSLCommerz cancel callback)
 const sslCommerzCancel = async (req: Request, res: Response, next: NextFunction) => {};
 
-// POST /api/payments/stripe/webhook  (Stripe webhook)
-const stripeWebhook = async (req: Request, res: Response, next: NextFunction) => {};
+const stripeWebhook = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const signature = req.headers['stripe-signature'] as string;
+  const rawBody = (req as any).rawBody; 
+  if (!rawBody || !signature) {
+    res.status(400).send("Webhook Error: Missing body or signature");
+    return;
+  }
+
+  const result = await paymentService.stripeWebhook(rawBody, signature);
+  res.status(200).json(result);
+});
 
 export const paymentController = {
   createPayment,

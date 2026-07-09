@@ -147,7 +147,43 @@ const sslCommerzFail = async (data: Record<string, unknown>) => {};
 
 const sslCommerzCancel = async (data: Record<string, unknown>) => {};
 
-const stripeWebhook = async (rawBody: Buffer, signature: string) => {};
+const stripeWebhook = async (rawBody: Buffer, signature: string) => {
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      signature,
+      config.stripe_webhook_secret as string
+    );
+  } catch (err: any) {
+    throw new Error(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const transactionId = paymentIntent.id;
+
+    await prisma.payment.updateMany({
+      where: { transactionId },
+      data: {
+        status: "COMPLETED",
+        paidAt: new Date()
+      }
+    });
+  } else if (event.type === 'payment_intent.payment_failed') {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const transactionId = paymentIntent.id;
+
+    await prisma.payment.updateMany({
+      where: { transactionId },
+      data: {
+        status: "FAILED"
+      }
+    });
+  }
+
+  return { received: true };
+};
 
 export const paymentService = {
   createPayment,

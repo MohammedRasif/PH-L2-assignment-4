@@ -25,7 +25,11 @@ app.use(cors({
 
 }))
 
-app.use(express.json())
+app.use(express.json({
+  verify: (req: Request, res: Response, buf: Buffer) => {
+    (req as any).rawBody = buf;
+  }
+}))
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 
