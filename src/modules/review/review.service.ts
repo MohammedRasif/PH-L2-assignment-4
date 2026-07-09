@@ -7,12 +7,12 @@ const createReview = async (tenantId: string, payload: ICreateReviewPayload) => 
     where: {
       tenantId,
       propertyId: payload.propertyId,
-      status: "APPROVED"
+      status: "COMPLETED"
     }
   });
 
   if (!hasRented) {
-    throw new Error("You can only review properties you have rented");
+    throw new Error("You can only review properties you have rented and completed payment for");
   }
 
   const review = await prisma.review.create({

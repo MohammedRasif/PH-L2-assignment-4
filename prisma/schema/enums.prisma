@@ -13,6 +13,7 @@ enum RequestStatus {
   PENDING
   APPROVED
   REJECTED
+  COMPLETED
 }
 
 enum PaymentStatus {

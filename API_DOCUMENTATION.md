@@ -117,7 +117,8 @@ To test the entire flow of the application properly, follow these steps in order
 ### Approve/Reject Request
 - **Endpoint:** `PATCH /api/requests/landlord/:id`
 - **Roles:** `LANDLORD`
-- **Body:** `{ "status": "APPROVED" }` *(Options: PENDING, APPROVED, REJECTED)*
+- **Body:** `{ "status": "APPROVED" }` *(Options: PENDING, APPROVED, REJECTED, COMPLETED)*
+*(Note: COMPLETED status is automatically set when payment is successful)*
 
 ---
 
@@ -146,6 +147,7 @@ To test the entire flow of the application properly, follow these steps in order
 - **Endpoint:** `POST /api/reviews`
 - **Roles:** `TENANT`
 - **Body:** `{ "propertyId": "uuid", "rating": 5, "comment": "Great place!" }`
+- **Requirement:** The tenant must have a `COMPLETED` rental request (meaning they have successfully paid) for the property to submit a review.
 
 ### Get Property Reviews
 - **Endpoint:** `GET /api/reviews?propertyId=uuid`

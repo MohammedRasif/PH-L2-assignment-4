@@ -109,6 +109,12 @@ const confirmPayment = async (payload: IConfirmPaymentPayload) => {
         paidAt: new Date()
       }
     });
+
+    await prisma.rentalRequest.update({
+      where: { id: payment.rentalRequestId },
+      data: { status: "COMPLETED" }
+    });
+
     return { message: "Payment confirmed successfully" };
   } else {
     throw new Error(`Payment status is ${session.payment_status}, expected paid`);
@@ -170,13 +176,22 @@ const stripeWebhook = async (rawBody: Buffer, signature: string) => {
     const transactionId = session.id;
 
     if (session.payment_status === "paid") {
-      await prisma.payment.updateMany({
-        where: { transactionId },
-        data: {
-          status: "COMPLETED",
-          paidAt: new Date()
-        }
-      });
+      const payment = await prisma.payment.findUnique({ where: { transactionId } });
+      
+      if (payment) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: {
+            status: "COMPLETED",
+            paidAt: new Date()
+          }
+        });
+
+        await prisma.rentalRequest.update({
+          where: { id: payment.rentalRequestId },
+          data: { status: "COMPLETED" }
+        });
+      }
     }
   } else if (event.type === 'checkout.session.expired') {
     const session = event.data.object as Stripe.Checkout.Session;
