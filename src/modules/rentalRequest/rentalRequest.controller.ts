@@ -4,9 +4,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 
-// ========================
-// Rental Request Controller
-// ========================
 
 const createRentalRequest = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const tenantId = req.user?.id as string;

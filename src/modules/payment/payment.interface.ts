@@ -1,8 +1,5 @@
 import { PaymentProvider } from "../../../generated/prisma/enums";
 
-// ========================
-// Payment Interfaces
-// ========================
 
 export interface ICreatePaymentPayload {
   rentalRequestId: string;
