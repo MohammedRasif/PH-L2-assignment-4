@@ -22,7 +22,7 @@ const getCategoryById = catchAsync(async (req: Request, res: Response, next: Nex
         throw new Error("Category id is required in params");
     }
 
-    const result = await categoryService.getCategoryById(id);
+    const result = await categoryService.getCategoryById(id as string);
 
     sendResponse(res, {
         success: true,
@@ -34,6 +34,7 @@ const getCategoryById = catchAsync(async (req: Request, res: Response, next: Nex
 
 const createCategory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
+    console.log(" payload", payload);
 
     const result = await categoryService.createCategory(payload);
 
