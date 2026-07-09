@@ -3,7 +3,16 @@ import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 
-const stripe = new Stripe(config.stripe_secret_key as string);
+let _stripe: Stripe | null = null;
+const getStripe = (): Stripe => {
+  if (!_stripe) {
+    if (!config.stripe_secret_key) {
+      throw new Error("STRIPE_SECRET_KEY is not defined in environment variables");
+    }
+    _stripe = new Stripe(config.stripe_secret_key as string);
+  }
+  return _stripe;
+};
 
 const createPayment = async (tenantId: string, payload: ICreatePaymentPayload) => {
   const rentalRequest = await prisma.rentalRequest.findUnique({
@@ -33,7 +42,7 @@ const createPayment = async (tenantId: string, payload: ICreatePaymentPayload) =
 
   const amountInCents = Math.round(rentalRequest.property.price * 100);
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     line_items: [
       {
         price_data: {
@@ -99,7 +108,7 @@ const confirmPayment = async (payload: IConfirmPaymentPayload) => {
     return { message: "Payment already confirmed" };
   }
 
-  const session = await stripe.checkout.sessions.retrieve(payload.transactionId);
+  const session = await getStripe().checkout.sessions.retrieve(payload.transactionId);
 
   if (session.payment_status === "paid") {
     await prisma.$transaction(async (tx) => {
@@ -164,7 +173,7 @@ const getPaymentById = async (paymentId: string, userId: string) => {
 const stripeWebhook = async (rawBody: Buffer, signature: string) => {
   let event;
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       rawBody,
       signature,
       config.stripe_webhook_secret as string
