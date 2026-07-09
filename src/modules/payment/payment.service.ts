@@ -33,12 +33,22 @@ const createPayment = async (tenantId: string, payload: ICreatePaymentPayload) =
 
   const amountInCents = Math.round(rentalRequest.property.price * 100);
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountInCents,
-    currency: 'usd',
-    automatic_payment_methods: {
-      enabled: true,
-    },
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `Rental Payment for ${rentalRequest.property.title}`,
+          },
+          unit_amount: amountInCents,
+        },
+        quantity: 1,
+      }
+    ],
+    mode: "payment",
+    success_url: `${config.app_url}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.app_url}/payment/cancel`,
     metadata: {
       rentalRequestId: rentalRequest.id,
       tenantId
@@ -50,7 +60,7 @@ const createPayment = async (tenantId: string, payload: ICreatePaymentPayload) =
     payment = await prisma.payment.update({
       where: { id: existingPayment.id },
       data: {
-        transactionId: paymentIntent.id,
+        transactionId: session.id,
         amount: rentalRequest.property.price,
         provider: "STRIPE",
         method: "CARD",
@@ -60,7 +70,7 @@ const createPayment = async (tenantId: string, payload: ICreatePaymentPayload) =
   } else {
     payment = await prisma.payment.create({
       data: {
-        transactionId: paymentIntent.id,
+        transactionId: session.id,
         amount: rentalRequest.property.price,
         method: "CARD",
         provider: "STRIPE",
@@ -71,7 +81,7 @@ const createPayment = async (tenantId: string, payload: ICreatePaymentPayload) =
   }
 
   return {
-    clientSecret: paymentIntent.client_secret,
+    checkoutUrl: session.url,
     paymentId: payment.id,
   };
 };
@@ -89,9 +99,9 @@ const confirmPayment = async (payload: IConfirmPaymentPayload) => {
     return { message: "Payment already confirmed" };
   }
 
-  const paymentIntent = await stripe.paymentIntents.retrieve(payload.transactionId);
+  const session = await stripe.checkout.sessions.retrieve(payload.transactionId);
 
-  if (paymentIntent.status === "succeeded") {
+  if (session.payment_status === "paid") {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
@@ -101,7 +111,7 @@ const confirmPayment = async (payload: IConfirmPaymentPayload) => {
     });
     return { message: "Payment confirmed successfully" };
   } else {
-    throw new Error(`Payment status is ${paymentIntent.status}, expected succeeded`);
+    throw new Error(`Payment status is ${session.payment_status}, expected paid`);
   }
 };
 
@@ -141,11 +151,7 @@ const getPaymentById = async (paymentId: string, userId: string) => {
   return payment;
 };
 
-const sslCommerzSuccess = async (data: Record<string, unknown>) => {};
 
-const sslCommerzFail = async (data: Record<string, unknown>) => {};
-
-const sslCommerzCancel = async (data: Record<string, unknown>) => {};
 
 const stripeWebhook = async (rawBody: Buffer, signature: string) => {
   let event;
@@ -159,20 +165,22 @@ const stripeWebhook = async (rawBody: Buffer, signature: string) => {
     throw new Error(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    const transactionId = paymentIntent.id;
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const transactionId = session.id;
 
-    await prisma.payment.updateMany({
-      where: { transactionId },
-      data: {
-        status: "COMPLETED",
-        paidAt: new Date()
-      }
-    });
-  } else if (event.type === 'payment_intent.payment_failed') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
-    const transactionId = paymentIntent.id;
+    if (session.payment_status === "paid") {
+      await prisma.payment.updateMany({
+        where: { transactionId },
+        data: {
+          status: "COMPLETED",
+          paidAt: new Date()
+        }
+      });
+    }
+  } else if (event.type === 'checkout.session.expired') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const transactionId = session.id;
 
     await prisma.payment.updateMany({
       where: { transactionId },
@@ -190,8 +198,5 @@ export const paymentService = {
   confirmPayment,
   getMyPayments,
   getPaymentById,
-  sslCommerzSuccess,
-  sslCommerzFail,
-  sslCommerzCancel,
   stripeWebhook,
 };

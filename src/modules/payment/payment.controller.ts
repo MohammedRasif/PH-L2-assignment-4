@@ -73,11 +73,6 @@ const getPaymentById = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-const sslCommerzSuccess = async (req: Request, res: Response, next: NextFunction) => {};
-
-const sslCommerzFail = async (req: Request, res: Response, next: NextFunction) => {};
-
-const sslCommerzCancel = async (req: Request, res: Response, next: NextFunction) => {};
 
 const stripeWebhook = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const signature = req.headers['stripe-signature'] as string;
@@ -96,8 +91,6 @@ export const paymentController = {
   confirmPayment,
   getMyPayments,
   getPaymentById,
-  sslCommerzSuccess,
-  sslCommerzFail,
-  sslCommerzCancel,
+
   stripeWebhook,
 };

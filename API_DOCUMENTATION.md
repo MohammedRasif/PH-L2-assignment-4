@@ -25,7 +25,7 @@ To test the entire flow of the application properly, follow these steps in order
 3. **Approve Request (Landlord):** Use Landlord token. Call `PATCH /api/requests/landlord/:id` with `status: "APPROVED"`.
 
 ### 4. Payment Flow (Stripe)
-1. **Create Payment Intent (Tenant):** Use Tenant token. Call `POST /api/payments/create` with the approved request `id` and `provider: "STRIPE"`. Copy the `transactionId` (which is the Stripe intent ID).
+1. **Create Checkout Session (Tenant):** Use Tenant token. Call `POST /api/payments/create` with the approved request `id` and `provider: "STRIPE"`. Copy the `checkoutUrl` from the response to redirect the user to Stripe. The `transactionId` (session ID) is also returned if you need to manually confirm it.
 2. **Confirm Payment (Tenant):** Call `POST /api/payments/confirm` with the `transactionId`. (Note: In a real app, Stripe frontend handles this, but here you can test the webhook/manual confirm).
 
 ### 5. Review
@@ -118,10 +118,11 @@ To test the entire flow of the application properly, follow these steps in order
 
 ## 5. Payments
 
-### Create Payment Intent
+### Create Checkout Session
 - **Endpoint:** `POST /api/payments/create`
 - **Roles:** `TENANT`
 - **Body:** `{ "rentalRequestId": "uuid", "provider": "STRIPE" }`
+- **Response:** Returns `checkoutUrl` to redirect the user to Stripe's hosted payment page.
 
 ### Confirm Payment
 - **Endpoint:** `POST /api/payments/confirm`

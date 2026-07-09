@@ -30,9 +30,7 @@ router.get(
 );
 
 
-router.post("/ssl/success", paymentController.sslCommerzSuccess);
-router.post("/ssl/fail", paymentController.sslCommerzFail);
-router.post("/ssl/cancel", paymentController.sslCommerzCancel);
+
 
 router.post("/stripe/webhook", paymentController.stripeWebhook);
 
