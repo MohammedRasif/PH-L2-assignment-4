@@ -42,6 +42,7 @@ const getRentalRequestById = catchAsync(async (req: Request, res: Response, next
 });
 
 const getLandlordRentalRequests = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  console.log("hit get landlord rental requests")
   const landlordId = req.user?.id as string;
   const filters = req.query;
   const result = await rentalRequestService.getLandlordRentalRequests(landlordId, filters);
