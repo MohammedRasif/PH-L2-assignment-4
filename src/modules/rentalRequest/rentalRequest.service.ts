@@ -1,10 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { ICreateRentalRequestPayload, IRentalRequestFilterQuery, IUpdateRentalRequestStatusPayload } from "./rentalRequest.interface";
 
-// ========================
-// Rental Request Service
-// ========================
-
 const createRentalRequest = async (tenantId: string, payload: ICreateRentalRequestPayload) => {
   const property = await prisma.property.findUnique({
     where: { id: payload.propertyId }

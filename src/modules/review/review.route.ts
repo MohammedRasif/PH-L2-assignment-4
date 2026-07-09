@@ -5,14 +5,8 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
-// ========================
-// Public Routes
-// ========================
 router.get("/", reviewController.getPropertyReviews);
 
-// ========================
-// Tenant Protected Routes
-// ========================
 router.post(
   "/",
   auth(Role.TENANT),

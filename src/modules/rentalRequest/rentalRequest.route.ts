@@ -5,9 +5,7 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
-// ========================
-// Tenant Routes
-// ========================
+
 router.post(
   "/",
   auth(Role.TENANT),
@@ -26,9 +24,7 @@ router.get(
   rentalRequestController.getRentalRequestById
 );
 
-// ========================
-// Landlord Routes
-// ========================
+
 router.get(
   "/landlord/all",
   auth(Role.LANDLORD),
@@ -41,9 +37,6 @@ router.patch(
   rentalRequestController.updateRentalRequestStatus
 );
 
-// ========================
-// Admin Routes
-// ========================
 router.get(
   "/admin/all",
   auth(Role.ADMIN),

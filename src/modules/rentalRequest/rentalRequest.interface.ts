@@ -1,9 +1,5 @@
 import { RequestStatus } from "../../../generated/prisma/enums";
 
-// ========================
-// Rental Request Interfaces
-// ========================
-
 export interface ICreateRentalRequestPayload {
   propertyId: string;
   message?: string;

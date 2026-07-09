@@ -1,7 +1,3 @@
-// ========================
-// Review Interfaces
-// ========================
-
 export interface ICreateReviewPayload {
   propertyId: string;
   rating: number; // 1 - 5
