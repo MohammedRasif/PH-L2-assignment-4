@@ -1,20 +1,19 @@
 model Property {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Int
-  location    String
-  bedrooms    Int
-  bathrooms   Int
-  categoryId  String
-  amenities   String[]
-  isAvailable Boolean  @default(true)
-  category    Category @relation(fields: [categoryId], references: [id])
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id             String          @id @default(uuid())
+  title          String
+  description    String
+  price          Int
+  location       String
+  bedrooms       Int
+  bathrooms      Int
+  categoryId     String
+  amenities      String[]
+  isAvailable    Boolean         @default(true)
+  ownerId        String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  category       Category        @relation(fields: [categoryId], references: [id])
+  owner          User            @relation(fields: [ownerId], references: [id])
   rentalRequests RentalRequest[]
   reviews        Review[]
 
