@@ -17,12 +17,15 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
 
 const updateUserStatus = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
-  const payload = req.body;
+  const payload = req.body; // body optional — না দিলে auto-toggle হবে
   const result = await adminService.updateUserStatus(id, payload);
+  const message = result.activeStatus === "BLOCKED"
+    ? "User has been banned successfully"
+    : "User has been unbanned successfully";
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: "User status updated successfully",
+    message,
     data: result
   });
 });

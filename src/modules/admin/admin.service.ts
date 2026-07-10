@@ -17,15 +17,26 @@ const getAllUsers = async (filters: IAdminUserFilterQuery) => {
   return users;
 };
 
-const updateUserStatus = async (userId: string, payload: IUpdateUserStatusPayload) => {
+const updateUserStatus = async (userId: string, payload?: IUpdateUserStatusPayload) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
     throw new Error("User not found");
   }
 
+  // Body দিলে সেটা use করো, না দিলে auto-toggle করো
+  let newStatus: "ACTIVE" | "BLOCKED";
+
+  if (payload?.status) {
+    // Explicitly body তে status দেওয়া হয়েছে
+    newStatus = payload.status;
+  } else {
+    // Auto-toggle: ACTIVE হলে BLOCKED করো, BLOCKED হলে ACTIVE করো
+    newStatus = user.activeStatus === "ACTIVE" ? "BLOCKED" : "ACTIVE";
+  }
+
   const updatedUser = await prisma.user.update({
     where: { id: userId },
-    data: { activeStatus: payload.status },
+    data: { activeStatus: newStatus },
     select: {
       id: true,
       name: true,

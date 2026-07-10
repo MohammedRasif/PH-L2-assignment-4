@@ -2,17 +2,43 @@ import { prisma } from "../../lib/prisma";
 import { ICreateReviewPayload, IReviewFilterQuery, IUpdateReviewPayload } from "./review.interface";
 
 const createReview = async (tenantId: string, payload: ICreateReviewPayload) => {
-  // Option: verify if the user has an approved rental request for this property
-  const hasRented = await prisma.rentalRequest.findFirst({
+  console.log(`[Review] tenantId: ${tenantId}, propertyId: ${payload.propertyId}`);
+
+  // Step 1: rentalRequest status COMPLETED কিনা check করো
+  const rentalRequest = await prisma.rentalRequest.findFirst({
     where: {
       tenantId,
       propertyId: payload.propertyId,
-      status: "COMPLETED"
+    },
+    include: {
+      payment: true
     }
   });
 
-  if (!hasRented) {
+  console.log(`[Review] Found rentalRequest:`, JSON.stringify(rentalRequest, null, 2));
+
+  if (!rentalRequest) {
     throw new Error("You can only review properties you have rented and completed payment for");
+  }
+
+  const isRentalCompleted = rentalRequest.status === "COMPLETED";
+  const isPaymentCompleted = rentalRequest.payment?.status === "COMPLETED";
+  console.log(rentalRequest, "aaaaaaa")
+
+  console.log(`[Review] isRentalCompleted: ${isRentalCompleted}, isPaymentCompleted: ${isPaymentCompleted}`);
+
+  // কোনোটাই complete না হলে error দাও
+  if (!isRentalCompleted && !isPaymentCompleted) {
+    throw new Error("You can only review properties you have rented and completed payment for");
+  }
+
+  // Payment complete কিন্তু rentalRequest status এখনো update হয়নি — auto-fix করো
+  if (!isRentalCompleted && isPaymentCompleted) {
+    console.log(`[Review] Auto-fixing rentalRequest status to COMPLETED`);
+    await prisma.rentalRequest.update({
+      where: { id: rentalRequest.id },
+      data: { status: "COMPLETED" }
+    });
   }
 
   const review = await prisma.review.create({
@@ -73,7 +99,7 @@ const deleteReview = async (reviewId: string, userId: string) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  
+
   if (existingReview.tenantId !== userId && user?.role !== "ADMIN") {
     throw new Error("You are not authorized to delete this review");
   }
