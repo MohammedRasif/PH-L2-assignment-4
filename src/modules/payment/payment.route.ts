@@ -7,19 +7,19 @@ const router = Router();
 
 router.post(
   "/create",
-  auth(Role.TENANT),
+  auth(Role.TENANT, Role.ADMIN),
   paymentController.createPayment
 );
 
 router.post(
   "/confirm",
-  auth(Role.TENANT),
+  auth(Role.TENANT, Role.ADMIN),
   paymentController.confirmPayment
 );
 
 router.get(
   "/",
-  auth(Role.TENANT),
+  auth(Role.TENANT, Role.ADMIN),
   paymentController.getMyPayments
 );
 

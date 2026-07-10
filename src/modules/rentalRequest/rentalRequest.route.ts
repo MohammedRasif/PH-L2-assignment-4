@@ -14,7 +14,7 @@ router.post(
 
 router.get(
   "/",
-  auth(Role.TENANT),
+  auth(Role.TENANT, Role.ADMIN),
   rentalRequestController.getMyRentalRequests
 );
 
@@ -27,13 +27,13 @@ router.get(
 
 router.get(
   "/landlord/all",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   rentalRequestController.getLandlordRentalRequests
 );
 
 router.patch(
   "/landlord/:id",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   rentalRequestController.updateRentalRequestStatus
 );
 

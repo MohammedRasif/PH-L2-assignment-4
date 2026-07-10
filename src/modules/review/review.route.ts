@@ -9,13 +9,13 @@ router.get("/", reviewController.getPropertyReviews);
 
 router.post(
   "/",
-  auth(Role.TENANT),
+  auth(Role.TENANT, Role.ADMIN),
   reviewController.createReview
 );
 
 router.put(
   "/:id",
-  auth(Role.TENANT),
+  auth(Role.TENANT, Role.ADMIN),
   reviewController.updateReview
 );
 

@@ -4,7 +4,6 @@ import { ICreateReviewPayload, IReviewFilterQuery, IUpdateReviewPayload } from "
 const createReview = async (tenantId: string, payload: ICreateReviewPayload) => {
   console.log(`[Review] tenantId: ${tenantId}, propertyId: ${payload.propertyId}`);
 
-  // Step 1: rentalRequest status COMPLETED কিনা check করো
   const rentalRequest = await prisma.rentalRequest.findFirst({
     where: {
       tenantId,
@@ -27,12 +26,10 @@ const createReview = async (tenantId: string, payload: ICreateReviewPayload) => 
 
   console.log(`[Review] isRentalCompleted: ${isRentalCompleted}, isPaymentCompleted: ${isPaymentCompleted}`);
 
-  // কোনোটাই complete না হলে error দাও
   if (!isRentalCompleted && !isPaymentCompleted) {
     throw new Error("You can only review properties you have rented and completed payment for");
   }
 
-  // Payment complete কিন্তু rentalRequest status এখনো update হয়নি — auto-fix করো
   if (!isRentalCompleted && isPaymentCompleted) {
     console.log(`[Review] Auto-fixing rentalRequest status to COMPLETED`);
     await prisma.rentalRequest.update({

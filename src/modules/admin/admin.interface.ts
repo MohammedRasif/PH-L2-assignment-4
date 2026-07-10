@@ -1,8 +1,5 @@
 import { ActiveStatus } from "../../../generated/prisma/enums";
 
-// ========================
-// Admin Interfaces
-// ========================
 
 export interface IUpdateUserStatusPayload {
   activeStatus: ActiveStatus;

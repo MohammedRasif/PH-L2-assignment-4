@@ -12,25 +12,25 @@ router.get("/:id", propertyController.getPropertyById);
 
 router.post(
   "/",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   propertyController.createProperty
 );
 
 router.put(
   "/:id",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   propertyController.updateProperty
 );
 
 router.delete(
   "/:id",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   propertyController.deleteProperty
 );
 
 router.patch(
   "/:id/availability",
-  auth(Role.LANDLORD),
+  auth(Role.LANDLORD, Role.ADMIN),
   propertyController.toggleAvailability
 );
 
